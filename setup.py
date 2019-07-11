@@ -1,14 +1,14 @@
 import setuptools
 
 setuptools.setup(
-    name = 'hiddenlayer',
+    name = 'beautylogger',
     # packages = ['hiddenlayer'],
     packages = setuptools.find_packages(),
-    version = '0.2',
+    version = '0.0.1',
     license="MIT",
-    description = 'Neural network graphs and training metrics for PyTorch and TensorFlow',
-    author = 'Waleed Abdulla <waleed.abdulla@gmail.com>, Phil Ferriere <pferriere@hotmail.com>',
-    url = 'https://github.com/waleedka/hiddenlayer',
+    description = 'Fork of hiddenlayer package to track training progress, aggregate losses and check save and early stopping criteria.',
+    author = 'Yaroslav Zharov <mart.slaaf@gmail.com>',
+    url = 'https://github.com/MartSlaaf/beautylogger',
     classifiers = [
     # How mature is this project? Common values are
     #   3 - Alpha
