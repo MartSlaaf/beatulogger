@@ -120,9 +120,6 @@ class BeautyLogger:
         best_value = tracking_mode(track)
         return len(track) - (np.where(track==best_value)[0][-1] + 1)
 
-
-
-
     def _concat_params(self, step_type, param_names):
         return [self._concat_param(self.inter_epoch[step_type][par_n]) for par_n in param_names]
 
@@ -165,22 +162,17 @@ class BeautyLogger:
 
     def plot(self):
         with self.canvas:
-            for plot_type, plot_elements in self.plots:
-                if plot_type == 'plot':
-                    if isinstance(plot_elements, str):
-                        plot_elements = [plot_elements]
-                    new_plot_elements = []
-                    for plot_element in plot_elements:
-                        if '(' in plot_element:
-                            new_plot_elements.append(plot_element)
-                        else:
-                            new_plot_elements += [elemname for elemname in self.epochs.metrics if elemname.startswith(plot_element)]
+            for plot_elements in self.plots:
+                if isinstance(plot_elements, str):
+                    plot_elements = [plot_elements]
+                new_plot_elements = []
+                for plot_element in plot_elements:
+                    if '(' in plot_element:
+                        new_plot_elements.append(plot_element)
+                    else:
+                        new_plot_elements += [elemname for elemname in self.epochs.metrics if elemname.startswith(plot_element)]
 
-                    self.canvas.draw_plot([self.epochs[p_e] for p_e in new_plot_elements])
-                elif plot_type == 'summary':
-                    self.canvas.draw_summary(self.epochs)
-                else:
-                    raise NotImplemented('plot types other than summary and plot are not supported yet!')
+                self.canvas.draw_plot([self.epochs[p_e] for p_e in new_plot_elements])
 
     def print(self):
         if self.print_mode == 'last':
