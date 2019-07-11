@@ -148,11 +148,11 @@ class BeautyLogger:
                 agg_funcs.append(func_to_agg)
                 agg_params.append(param)
 
-            self.epochs.log(self.step, **{step_type+'_'+n: f(p) for p,f,n in zip(self._concat_params(step_type, agg_params), agg_funcs, agg_params)})
+            self.epochs.log(self.step, **{n+'('+step_type+')': f(p) for p,f,n in zip(self._concat_params(step_type, agg_params), agg_funcs, agg_params)})
 
         if self.calculable is not None:
             for input_params, output_param, convert_function in self.calculable:
-                self.epochs.log(self.step, **{step_type+'_'+output_param: convert_function(*self._concat_params(step_type, input_params))})
+                self.epochs.log(self.step, **{output_param+'('+step_type+')': convert_function(*self._concat_params(step_type, input_params))})
 
     def log_epoch(self, **kwargs):
         for step_type in self.inter_epoch.keys():
@@ -167,7 +167,16 @@ class BeautyLogger:
         with self.canvas:
             for plot_type, plot_elements in self.plots:
                 if plot_type == 'plot':
-                    self.canvas.draw_plot([self.epochs[p_e] for p_e in plot_elements])
+                    if isinstance(plot_elements, str):
+                        plot_elements = [plot_elements]
+                    new_plot_elements = []
+                    for plot_element in plot_elements:
+                        if '(' in plot_element:
+                            new_plot_elements.append(plot_element)
+                        else:
+                            new_plot_elements += [elemname for elemname in self.epochs.metrics if elemname.startswith(plot_element)]
+
+                    self.canvas.draw_plot([self.epochs[p_e] for p_e in new_plot_elements])
                 elif plot_type == 'summary':
                     self.canvas.draw_summary(self.epochs)
                 else:
