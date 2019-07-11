@@ -1,6 +1,6 @@
 from collections import defaultdict
-from history import History
-from canvas import Canvas
+from .history import History
+from .canvas import Canvas
 import numpy as np
 
 import torch
@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 class BeautyLogger:
     #TODO: add comments
+    #TODO: refactor holding of plottables to let user select only name, not train\test
     #TODO: add more conveniency in calculation and agregation
     #TODO: add overridable aggregators?
     #TODO: add tests
