@@ -18,45 +18,101 @@ class BeautyLogger:
         """
         Class for logging of training process parameters. Could also aggregate metrics, plot or print them for you.
         Args:
-            aggregable (dict): parameters to be aggregated. Key should be name of parameter, value should be either 'mean', 'max' or callable to get aggregate.
+            aggregable (list): parameters to be aggregated. First should be name of parameter, second should be either 'mean', 'max' or callable to get aggregate.
             calculable (list): parameters to be aggregated via complex function. Every list element should be tuple: (list of input parameters names, output parameter name, aggregating function)
             plots (list): plots to be shown. Every list element should be a tuple: (type of plot, list of parameters to plot)
             progressbar (str): could be either 'none' for no progress bar at all, 'epochs' for progress over epochs, 'steps' for progress bar over steps or 'both' for both steps and epochs progressbars.
             prints (list): parameters to be printed. Each element should be either string (parameter name) or pair (parameter name, mode: 'max'/'min'). If mode setted, maximum or minimum achieved value will be printed
             trackable (str): parameter name to track for early stopping or model saving. Is required for functions is_best and steps_without_progress
         """
-        self.aggregable = aggregable if aggregable is not None else {}
-        self.calculable = calculable
-        if self.calculable is not None:
-            self.calculable_inputs = [c[0] for c in self.calculable]
-        else:
-            self.calculable_inputs = []
+        # setup aggregable parameters
+        self.aggregable = {}
+        if aggregable is not None:
+            for aggregation_params in aggregable:
+                self.add_aggregable(*aggregation_params)
 
-        self.plots = plots
-        if prints is not None:
-            self.prints = self._initialize_prints(prints)
-        else:
-            self.prints = None
-        self.prin_mode = print_mode
+        # setup calculable parameters
+        self.calculable = []
+        self.calculable_inputs = []
+        if calculable is not None:
+            for calculable_parameters in calculable:
+                self.add_calculable(*calculable_parameters)
 
+        # setup plots
+        self.plots = []
+        if plots is not None:
+            for plot_definition in plots:
+                self.add_plot(plot_definition)
+
+        # setup tracking mode
+        self.trackable = trackable
+        self.tracking_mode = np.max if tracking_mode == 'max' else np.min
+
+        # setup intenals
         self.inter_epoch = defaultdict(lambda:defaultdict(list))
 
         self.epochs = History()
         if self.plots is not None:
             self.canvas = Canvas()
 
+        self.step = 0
+
+        # progress-bars TBD:
+        if prints is not None:
+            self.prints = self._initialize_prints(prints)
+        else:
+            self.prints = None
+        self.prin_mode = print_mode
         self.epochs_progressbar = None
         self.steps_progressbar = None
-
-        self.trackable = trackable
-        self.tracking_mode = np.max if tracking_mode == 'max' else np.min
-
         if progressbar in ['epochs', 'both']:
             self.epochs_progressbar = tqdm()
         if progressbar in ['steps', 'both']:
             self.steps_progressbar = tqdm()
 
-        self.step = 0
+    def add_aggregable(self, metric_name, aggregation_type='mean'):
+        """
+        Adds agregable metrics to track.
+        Args:
+            metric_name (str): the metric name without parenthesis.
+            aggregation_type (str, callable): the function to reduce iterations over epoch. Strings supported now are 'mean' and 'max'
+        """
+        if aggregation_type == 'mean':
+            self.aggregable[metric_name] = np.mean
+        elif aggregation_type == 'max':
+            self.aggregable[metric_name] = np.max
+        elif callable(aggregation_type):
+            self.aggregable[metric_name] = agg_type
+        else:
+            raise ValueError('aggregation type expected to be "mean", "max" or callable.')
+
+    def add_calculable(self, input_names, output_name, function):
+        """
+        Adds calculable metrics to track.
+        Args:
+            input_names (list): names (without parenthesis) of metrics to be aggregated into new one, in order of input to function.
+            output_name (str): name of new metric to create after aggregation.
+            function (callable): function to aggregate metrics.
+        """
+        self.calculable_inputs += input_names
+        if callable(function):
+            self.calculable.append(input_names, output_name, function)
+        else:
+            raise ValueError('Function expected to be callable')
+
+    def add_plot(self, names_to_plot):
+        """
+        Adds one plot to track.
+        Args:
+            names_to_plot (str, list): name of parameter to plot, or list of names.
+                If passed with parenthesis will plot selected type of iteration (train-test-etc), if without -- all available types for the same name.
+        """
+        if isinstance(names_to_plot, str):
+            self.plots.append([names_to_plot])
+        elif isinstance(names_to_plot, list):
+            self.plots.append(names_to_plot)
+        else:
+            raise ValueError(f'metrics to plot {names_to_plot} are of incorrect type. Either str or list expected.')
 
     def _initialize_prints(self, prints):
         new_prints = []
