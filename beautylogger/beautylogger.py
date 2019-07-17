@@ -10,7 +10,6 @@ from tqdm import tqdm
 
 class BeautyLogger:
     #TODO: add comments
-    #TODO: add more conveniency in calculation and agregation
     #TODO: add overridable aggregators?
     #TODO: add tests
 
@@ -96,7 +95,7 @@ class BeautyLogger:
         """
         self.calculable_inputs += input_names
         if callable(function):
-            self.calculable.append(input_names, output_name, function)
+            self.calculable.append((input_names, output_name, function))
         else:
             raise ValueError('Function expected to be callable')
 
