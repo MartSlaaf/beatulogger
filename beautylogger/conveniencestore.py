@@ -31,6 +31,6 @@ def decorate_text_with_words(text, intensity, inverse_dictionary=None, coloring_
     for t, i in zip(text, intensity):
         r, g, b = get_color_code(i, coloring_type)
         t = escape(t)
-        seq_diane.append(f'<span style="background-color: rgb({r}, {g}, {b}">{t} </span>')
+        html_result += f'<span style="background-color: rgb({r}, {g}, {b}">{t} </span>'
     fin_html = ''.join(seq_diane)
     display(HTML(fin_html))
