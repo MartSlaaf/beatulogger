@@ -3,9 +3,9 @@ from IPython.core.display import HTML
 
 def get_color_code(value, coloring_type):
     if coloring_type == 'positive':
-        r = 0
-        g = value * 255
-        b = 0
+        r = (1 - value) * 255
+        g = 255
+        b = (1 - value) * 255
     elif coloring_type == 'positive-negative':
         r = (1 - value) * 255
         g = value * 255
