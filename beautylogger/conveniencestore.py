@@ -9,7 +9,7 @@ def get_color_code(value, coloring_type):
     elif coloring_type == 'positive-negative':
         r = (1 - value) * 255
         g = value * 255
-        b = 0.5 - abs(value - 0.5)
+        b = 255 * (0.5 - abs(value - 0.5))
     elif coloring_type == 'cathegory':
         raise NotImplementedError('colorisation with cathegory id is not implemented yet!')
     else:
