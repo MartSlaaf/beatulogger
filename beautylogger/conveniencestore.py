@@ -32,3 +32,4 @@ def decorate_text_with_words(text, intensity, inverse_dictionary=None, coloring_
         t = escape(t)
         html_result += f'<span style="background-color: rgb({r}, {g}, {b}">{t} </span>'
     display(HTML(html_result))
+    return html_result
