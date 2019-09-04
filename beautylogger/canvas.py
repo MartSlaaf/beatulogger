@@ -177,14 +177,19 @@ class Canvas():
         # Loop through metrics
         title = ""
         self.ax.yaxis.tick_right()
+        self.ax.grid(which='both', axis='y')
+        subax = self.ax.twinx()
+        subax.set_yticks([])
         for i, m in enumerate(metrics):
             label = labels[i] if labels else m.name
+            # TODO: make a sortig by label, to let always right order in the
+            # parenthesis.
             # TODO: use a standard formating function for values
             #title += ("   " if title else "") + "{}: {}".format(label, m.data[-1])
             p = self.ax.plot(m.formatted_steps, m.data, label=label)
             # add the tag to the last point.
-            self.ax.set_yticks(list(self.ax.get_yticks()) + [m.data[-1]])
-            self.ax.get_yticklabels()[-1].set_color(p[-1].get_color())
+            subax.set_yticks(list(subax.get_yticks())+[m.data[-1]])
+            subax.get_yticklabels()[-1].set_color(p[-1].get_color())
 #            self.ax.annotate(f'{m.data[-1]:.2}', (len(m.data), m.data[-1]))
         self.ax.set_title(title)
         self.ax.set_ylabel(ylabel)
