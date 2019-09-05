@@ -191,6 +191,7 @@ class Canvas():
             subax.set_yticks(list(subax.get_yticks())+[m.data[-1]])
             subax.get_yticklabels()[-1].set_color(p[-1].get_color())
 #            self.ax.annotate(f'{m.data[-1]:.2}', (len(m.data), m.data[-1]))
+        subax.set_ylim(self.ax.get_ylim())
         self.ax.set_title(title)
         self.ax.set_ylabel(ylabel)
         self.ax.legend()
