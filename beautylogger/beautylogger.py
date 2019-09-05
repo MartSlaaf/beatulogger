@@ -4,6 +4,7 @@ from .canvas import Canvas
 import numpy as np
 
 import torch
+import re
 from numbers import Number
 
 from tqdm import tqdm
@@ -178,16 +179,19 @@ class BeautyLogger:
         return [self._concat_param(self.inter_epoch[step_type][par_n]) for par_n in param_names]
 
     def agg_epoch(self, step_type='train'):
-        # add mean as default aggregation if param is not used anywhere
+        # build temporal aggregables_list:
+        tmp_aggregable = dict()
         for param in self.inter_epoch[step_type].keys():
-            if (param not in self.aggregable.keys()) and (param not in self.calculable_inputs):
-                self.aggregable[param] = 'mean'
+            if param in self.aggregable.keys():
+                tmp_aggregable[param] = self.aggregable[param]
+            elif (param not in self.calculable_inputs):
+                tmp_aggregable[param] = 'mean'
 
         # aggregate all params meant in aggregable
         # TODO: move definition to init
-        if self.aggregable is not None:
+        if tmp_aggregable:
             agg_funcs, agg_params = [], []
-            for param, agg_type in self.aggregable.items():
+            for param, agg_type in tmp_aggregable.items():
                 if agg_type == 'mean':
                     func_to_agg = np.mean
                 elif agg_type == 'max':

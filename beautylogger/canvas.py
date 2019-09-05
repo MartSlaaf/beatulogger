@@ -188,9 +188,9 @@ class Canvas():
             #title += ("   " if title else "") + "{}: {}".format(label, m.data[-1])
             p = self.ax.plot(m.formatted_steps, m.data, label=label)
             # add the tag to the last point.
-            subax.set_yticks(list(subax.get_yticks())+[m.data[-1]])
-            subax.get_yticklabels()[-1].set_color(p[-1].get_color())
-#            self.ax.annotate(f'{m.data[-1]:.2}', (len(m.data), m.data[-1]))
+            if m.data[-1] is not None:
+                subax.set_yticks(list(subax.get_yticks())+[m.data[-1]])
+                subax.get_yticklabels()[-1].set_color(p[-1].get_color())
         subax.set_ylim(self.ax.get_ylim())
         self.ax.set_title(title)
         self.ax.set_ylabel(ylabel)
