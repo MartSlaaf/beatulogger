@@ -33,3 +33,17 @@ def decorate_text_with_words(text, intensity, inverse_dictionary=None, coloring_
         html_result += f'<span style="background-color: rgb({r}, {g}, {b})">{t} </span>'
     display(HTML(html_result))
     return html_result
+
+
+import os
+import tempfile
+import numpy as np
+
+def make_rotation_gif(ax, fig, file_to_save, elevation=30):
+    tmpdir = tempfile.TemporaryDirectory()
+    for azim in np.arange(0, 355, 5):
+        ax.view_init(elev=elevation, azim=azim)
+        fig.savefig(os.path.join(tmpdir.name, f'tmp_a{azim:03}.png'))
+    pathes_of_pngs = os.path.join(tmpdir.name, "tmp_a*.png")
+    os.system(f'convert -loop 0 -delay 10 {pathes_of_pngs} {file_to_save}')
+    tmpdir.cleanup()
