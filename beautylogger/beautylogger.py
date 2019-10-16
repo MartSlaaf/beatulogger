@@ -244,7 +244,7 @@ class BeautyLogger:
                 else:
                     new_plot_elements += sorted([elemname for elemname in self.epochs.metrics if re.match(f'^{elemname}(\(.+?\))?$', elemname)])
 
-            self.canvas.draw_plot(new_plot_elements[0], {p_e: self.epochs[p_e].data[-1] for p_e in new_plot_elements})
+            writer.add_scalars(new_plot_elements[0], {p_e: self.epochs[p_e].data[-1] for p_e in new_plot_elements})
         writer.close()
 
     def plot_canvas(self):
