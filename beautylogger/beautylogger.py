@@ -14,7 +14,8 @@ class BeautyLogger:
     #TODO: add overridable aggregators?
     #TODO: add tests
 
-    def __init__(self, aggregable=None, calculable=None, plots=None, progressbar='none', prints=None, print_mode='last', trackable=None, tracking_mode=None):
+    def __init__(self, aggregable=None, calculable=None, plots=None, progressbar='none', prints=None, print_mode='last', trackable=None,
+                 tracking_mode=None, plot_backend='canvas', tb_parameters=None):
         """
         Class for logging of training process parameters. Could also aggregate metrics, plot or print them for you.
         Args:
@@ -52,8 +53,14 @@ class BeautyLogger:
         self.inter_epoch = defaultdict(lambda:defaultdict(list))
 
         self.epochs = History()
-        if self.plots is not None:
+        self.plot_backend = plot_backend
+        if self.plot_backend == 'canvas':
             self.canvas = Canvas()
+        elif self.plot_backend == 'tensorboard':
+           from torch.utils import tensorbaord as tb
+           self.writer_parameters = {} if tb_parameters is None else tb_parameters
+        else:
+            raise Exception('Unexpected plotting backend!')
 
         self.step = 0
 
@@ -219,6 +226,27 @@ class BeautyLogger:
         self.inter_epoch = defaultdict(lambda:defaultdict(list))
 
     def plot(self):
+        if self.plot_backend == 'canvas':
+            self.plot_canvas()
+        elif self.plot_backend == 'tensorboard':
+            self.plot_tensorboard()
+
+    def plot_tensorboard(self):
+        writer = tb.SummaryWriter(**self.writer_parameters)
+        for plot_elements in self.plots:
+            if isinstance(plot_elements, str):
+                plot_elements = [plot_elements]
+            new_plot_elements = []
+            for plot_element in plot_elements:
+                if '(' in plot_element:
+                    new_plot_elements.append(plot_element)
+                else:
+                    new_plot_elements += sorted([elemname for elemname in self.epochs.metrics if re.match(f'{plot_element}\(+*\)', elemname)])
+
+            self.canvas.draw_plot(new_plot_elements[0], {p_e: self.epochs[p_e].data[-1] for p_e in new_plot_elements})
+        writer.close()
+
+    def plot_canvas(self):
         with self.canvas:
             for plot_elements in self.plots:
                 if isinstance(plot_elements, str):
@@ -228,8 +256,7 @@ class BeautyLogger:
                     if '(' in plot_element:
                         new_plot_elements.append(plot_element)
                     else:
-                        new_plot_elements += [elemname for elemname in self.epochs.metrics if elemname.startswith(plot_element)]
-
+                        new_plot_elements += sorted([elemname for elemname in self.epochs.metrics if re.match(f'{plot_element}\(+*\)', elemname)])
                 self.canvas.draw_plot([self.epochs[p_e] for p_e in new_plot_elements])
 
     def print(self):
