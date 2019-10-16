@@ -242,7 +242,7 @@ class BeautyLogger:
                 if '(' in plot_element:
                     new_plot_elements.append(plot_element)
                 else:
-                    new_plot_elements += sorted([elemname for elemname in self.epochs.metrics if re.match(f'^{elemname}(\(.+?\))?$', elemname)])
+                    new_plot_elements += sorted([elemname for elemname in self.epochs.metrics if re.match(f'^{plot_element}(\(.+?\))?$', elemname)])
 
             writer.add_scalars(new_plot_elements[0], {p_e: self.epochs[p_e].data[-1] for p_e in new_plot_elements}, global_step=self.step)
         writer.close()
