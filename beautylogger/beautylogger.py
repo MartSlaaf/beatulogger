@@ -257,7 +257,7 @@ class BeautyLogger:
                     if '(' in plot_element:
                         new_plot_elements.append(plot_element)
                     else:
-                        new_plot_elements += sorted([elemname for elemname in self.epochs.metrics if re.match(f'^{elemname}(\(.+?\))?$', elemname)])
+                        new_plot_elements += sorted([elemname for elemname in self.epochs.metrics if re.match(f'^{plot_element}(\(.+?\))?$', elemname)])
                 self.canvas.draw_plot([self.epochs[p_e] for p_e in new_plot_elements])
 
     def print(self):
