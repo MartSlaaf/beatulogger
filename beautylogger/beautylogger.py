@@ -57,7 +57,7 @@ class BeautyLogger:
         if self.plot_backend == 'canvas':
             self.canvas = Canvas()
         elif self.plot_backend == 'tensorboard':
-           from torch.utils import tensorbaord as tb
+           from torch.utils import tensorboard as tb
            self.writer_parameters = {} if tb_parameters is None else tb_parameters
         else:
             raise Exception('Unexpected plotting backend!')
