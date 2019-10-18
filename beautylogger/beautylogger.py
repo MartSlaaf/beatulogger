@@ -226,14 +226,8 @@ class BeautyLogger:
         self.step += 1
         self.inter_epoch = defaultdict(lambda:defaultdict(list))
 
-    def plot(self):
-        if self.plot_backend == 'canvas':
-            self.plot_canvas()
-        elif self.plot_backend == 'tensorboard':
-            self.plot_tensorboard()
-
-    def plot_tensorboard(self):
-        writer = tb.SummaryWriter(**self.writer_parameters)
+    def _collect_plot_elements(self):
+        all_the_plots = []
         for plot_elements in self.plots:
             if isinstance(plot_elements, str):
                 plot_elements = [plot_elements]
@@ -242,23 +236,31 @@ class BeautyLogger:
                 if '(' in plot_element:
                     new_plot_elements.append(plot_element)
                 else:
-                    new_plot_elements += sorted([elemname for elemname in self.epochs.metrics if re.match(f'^{plot_element}(\(.+?\))?$', elemname)])
+                    new_plot_elements += [elemname for elemname in self.epochs.metrics if re.match(f'^{plot_element}(\(.+?\))?$', elemname)]
 
-            writer.add_scalars(new_plot_elements[0], {p_e: self.epochs[p_e].data[-1] for p_e in new_plot_elements}, global_step=self.step)
+            # to enforce the same order for all times
+            new_plot_elements = sorted(new_plot_elements)
+            all_the_plots.append(new_plot_elements)
+        return all_the_plots
+
+    def plot(self):
+        if self.plot_backend == 'canvas':
+            self.plot_canvas()
+        elif self.plot_backend == 'tensorboard':
+            self.plot_tensorboard()
+
+    def plot_tensorboard(self):
+        plotting_sets = self._collect_plot_elements()
+        writer = tb.SummaryWriter(**self.writer_parameters)
+        for plotting_set in plotting_sets:
+            writer.add_scalars(new_plot_elements[0], {p_e: self.epochs[p_e].data[-1] for p_e in plotting_set}, global_step=self.step)
         writer.close()
 
     def plot_canvas(self):
+        plotting_sets = self._collect_plot_elements()
         with self.canvas:
-            for plot_elements in self.plots:
-                if isinstance(plot_elements, str):
-                    plot_elements = [plot_elements]
-                new_plot_elements = []
-                for plot_element in plot_elements:
-                    if '(' in plot_element:
-                        new_plot_elements.append(plot_element)
-                    else:
-                        new_plot_elements += sorted([elemname for elemname in self.epochs.metrics if re.match(f'^{plot_element}(\(.+?\))?$', elemname)])
-                self.canvas.draw_plot([self.epochs[p_e] for p_e in new_plot_elements])
+            for plotting_set in plotting_sets:
+                self.canvas.draw_plot([self.epochs[p_e] for p_e in plotting_set])
 
     def print(self):
         if self.print_mode == 'last':
